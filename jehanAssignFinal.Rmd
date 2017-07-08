@@ -1,0 +1,83 @@
+---
+title: "jehanAssignmentFinal"
+author: "Jehan Joshi"
+date: "8 July 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyr)
+library(plyr)
+library(readr)
+library(magrittr)
+```
+
+## Load the data 
+
+```
+refine_Orignal <- read.csv("C:\\Users\\lenovo\\Desktop\\springboard course\\data wrangling assign\\refine_orignal.csv", header = TRUE)
+
+```
+
+
+
+
+
+##  Cleaning the company column for spelling mistakes 
+
+
+
+```
+clean_test <- clean_test %>%
+mutate(company = replace(company, company %in% c('Phillips', 'phillips', 'philips', 'phllips', 'phillps',  'phillipS', 'phillips', 'fillips', 'phlips'), 'philips')) 
+
+clean_test <- clean_test %>%
+mutate(company = replace(company, company %in% c('Van Houten','van Houten','van houten','van houten','Van Houten'), 'van houten'))
+clean_test <- clean_test %>%
+mutate(company = replace(company, company %in% c('unilver','unilever','Unilever','unilever'), 'unilever'))
+clean_test <- clean_test %>%
+mutate(company = replace(company, company %in% c('akzo','Akzo', 'AKZO',  'akz0', 'ak zo', 'akzo',  'akzo'), 'akzo'))
+
+```
+
+## Separate Product and code number 
+
+```
+clean_data <-  refine_Orignal %>% 
+separate('Product.code...number', c("product_code","product_number"),sep = "-", remove=TRUE)
+
+```
+## ADD Product categories 
+
+```
+clean_data %>% mutate(product_category = case_when(clean_data$product_code == 'p' ~ 'Smartphone', clean_data$product_code == 'v' ~ 'TV', clean_data$product_code =='x' ~ 'Laptop',clean_data$product_code == 'q' ~ 'Tablet')
+```
+## ADD address for geo coding 
+
+```
+clean_data %>% unite(full_address, c(address, city, country),sep = ',',remove=TRUE)
+ 
+```
+
+## Add dummy variables 
+
+```
+
+clean_data %>% mutate(company_philips = (if_else(grepl(pattern='philips', x=clean_data$company), 1, 0))) %>%
+mutate(company_akzo = (if_else(grepl(pattern='akzo', x=clean_data$company), 1, 0))) %>%
+mutate(company_vanhouten = (if_else(grepl(pattern='van houten', x=clean_data$company), 1, 0))) %>%
+mutate(company_unilever = (if_else(grepl(pattern='unilever', x=clean_data$company), 1, 0))) %>%
+mutate(product_smartphone = (if_else(grepl(pattern='p', x=clean_data$product_code), 1, 0))) %>%
+mutate(product_laptop = (if_else(grepl(pattern='x', x=clean_data$product_code), 1, 0))) %>%
+mutate(product_TV = (if_else(grepl(pattern='v', x=clean_data$product_code), 1, 0))) %>%
+mutate(product_Tablet = (if_else(grepl(pattern='q', x=clean_data$product_code), 1, 0))) 
+
+```
+ 
+## Save the result 
+
+```
+write.csv(clean_test,"Refined.csv")
+
+```
